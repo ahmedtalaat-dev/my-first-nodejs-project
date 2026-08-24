@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 
@@ -9,9 +10,7 @@ app.use(express.json());
 
 // Connect to MongoDB
 async function main() {
-  await mongoose.connect(
-    "mongodb+srv://ahmedtalaatali04_db_user:5Eh6TTXnqASdUtUY@learn-mongo.ir0ey0a.mongodb.net/Node?appName=learn-mongo",
-  );
+  await mongoose.connect(process.env.MONGO_URL);
 
   console.log("MongoDB connected successfully");
 }
