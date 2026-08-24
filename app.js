@@ -10,7 +10,7 @@ app.use(express.json());
 // Connect to MongoDB
 async function main() {
   await mongoose.connect(
-    "mongodb+srv://ahmedtalaatali04_db_user:5Eh6TTXnqASdUtUY@learn-mongo.ir0ey0a.mongodb.net/Node?appName=learn-mongo"
+    "mongodb+srv://ahmedtalaatali04_db_user:5Eh6TTXnqASdUtUY@learn-mongo.ir0ey0a.mongodb.net/Node?appName=learn-mongo",
   );
 
   console.log("MongoDB connected successfully");
@@ -30,13 +30,27 @@ const courseSchema = new mongoose.Schema({
 const Course = mongoose.model("Course", courseSchema);
 
 // =========================
-// GET ALL COURSES
+// GET ALL COURSES - PAGINATION
 // =========================
 app.get("/api/courses", async (req, res) => {
   try {
-    const courses = await Course.find();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
 
-    res.json(courses);
+    const skip = (page - 1) * limit;
+
+    const courses = await Course.find().skip(skip).limit(limit);
+
+    const totalCourses = await Course.countDocuments();
+    const totalPages = Math.ceil(totalCourses / limit);
+
+    res.json({
+      page: page,
+      limit: limit,
+      totalCourses: totalCourses,
+      totalPages: totalPages,
+      courses: courses,
+    });
   } catch (err) {
     res.status(500).json({
       message: "Failed to get courses",
@@ -105,7 +119,7 @@ app.put("/api/courses/:id", async (req, res) => {
       },
       {
         new: true,
-      }
+      },
     );
 
     if (!updatedCourse) {
