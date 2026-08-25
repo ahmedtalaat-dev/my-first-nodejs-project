@@ -30,6 +30,7 @@ main().catch((err) => {
 const userSchema = new mongoose.Schema({
   name: String,
   email: String,
+  password: String,
 });
 
 // =========================
@@ -50,6 +51,39 @@ app.get("/api/users", async (req, res) => {
   } catch (err) {
     res.status(500).json({
       message: "Failed to get users",
+      error: err.message,
+    });
+  }
+});
+
+// =========================
+// REGISTER
+// =========================
+
+app.post("/api/users/register", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    const oldUser = await User.findOne({ email: email });
+
+    if (oldUser) {
+      return res.status(409).json({
+        message: "User already exists",
+      });
+    }
+
+    const newUser = new User({
+      name: name,
+      email: email,
+      password: password,
+    });
+
+    const savedUser = await newUser.save();
+
+    res.status(201).json(savedUser);
+  } catch (err) {
+    res.status(500).json({
+      message: "Failed to register user",
       error: err.message,
     });
   }
